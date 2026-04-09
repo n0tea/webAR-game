@@ -4,7 +4,6 @@ import './style.css';
 
 import {
   LEVEL_ONE_COPY,
-  LEVEL_TWO_PENDING_COPY,
   LEVEL_ZERO_COPY,
   MUSIC_URL,
   NOTE_FOUND_COPY,
