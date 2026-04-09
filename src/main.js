@@ -168,10 +168,6 @@ function onSelect() {
       return;
     }
   }
-
-  if (currentLevel === 2) {
-    checkItemClick();
-  }
 }
 
 function updateHitTest(frame) {
@@ -224,10 +220,6 @@ function createReticle() {
   mesh.matrixAutoUpdate = false;
   mesh.visible = false;
   return mesh;
-}
-
-function checkItemClick() {
-  hud.setStatus(RADAR_TAKEN_COPY);
 }
 
 function resumeMusic() {
