@@ -1,10 +1,15 @@
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import './style.css';
 
-const MODEL_URL = `${import.meta.env.BASE_URL}models/radar.glb`;
+const CHEST_MODEL_URL = `${import.meta.env.BASE_URL}models/radar.glb`;
 const MUSIC_URL = `${import.meta.env.BASE_URL}Spaceouters-Fireflies.mp3`;
 const PIN_CODE = '1234';
+const LEVEL_ONE_COPY =
+  'Перед вами сундук со снаряжением. Пин-код спрятан рядом. Осмотритесь, найдите записку и откройте сундук.';
+const LEVEL_ZERO_COPY = 'Для старта игры нажмите на кнопку Start AR.';
+const SCAN_COPY = 'Наведите камеру на пол для сканирования.';
 
 let container;
 let scene;
@@ -12,12 +17,21 @@ let camera;
 let renderer;
 let controller;
 let reticle;
+let raycaster;
 let currentLevel = 0;
 let hitTestSource = null;
 let hitTestSourceRequested = false;
-let suitcase = null;
+let chestObject = null;
+let noteObject = null;
+let scanStableFrames = 0;
+let levelPlaced = false;
+let noteFound = false;
+let musicEnabled = true;
 let items = [];
-let music = new Audio(MUSIC_URL);
+
+const music = new Audio(MUSIC_URL);
+music.loop = true;
+music.volume = 0.45;
 
 init();
 animate();
@@ -28,8 +42,9 @@ function init() {
 
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+  raycaster = new THREE.Raycaster();
 
-  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1.1);
   scene.add(light);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -58,33 +73,58 @@ function init() {
   scene.add(controller);
 
   window.addEventListener('resize', onWindowResize);
+  window.addEventListener('pointerdown', resumeMusic, { passive: true });
+  document.addEventListener('visibilitychange', syncMusicState);
 
-  document.getElementById('pin-submit').addEventListener('click', () => {
-    const value = document.getElementById('pin-input').value;
+  const pinSubmit = document.getElementById('pin-submit');
+  const pinInput = document.getElementById('pin-input');
+  const musicToggle = document.getElementById('music-toggle');
+
+  pinSubmit.addEventListener('click', () => {
+    const value = pinInput.value.trim();
 
     if (value === PIN_CODE) {
-      showStatus('Code accepted. Scanner unlocked.');
       document.getElementById('pin-panel').style.display = 'none';
-      startLevel2();
+      currentLevel = 2;
+      showStatus('Код принят. Следующий уровень подготовим, когда загрузите новые модели и звук радара.');
       return;
     }
 
-    showStatus('Wrong code.');
+    showStatus('Неверный код. Осмотритесь внимательнее и найдите правильную записку.');
+  });
+
+  musicToggle.addEventListener('click', () => {
+    musicEnabled = !musicEnabled;
+    updateMusicToggle();
+    syncMusicState();
+  });
+
+  renderer.xr.addEventListener('sessionstart', () => {
+    showStatus(SCAN_COPY);
+    resumeMusic();
   });
 
   renderer.xr.addEventListener('sessionend', () => {
     hitTestSourceRequested = false;
     hitTestSource = null;
     reticle.visible = false;
+    scanStableFrames = 0;
+    showStatus(LEVEL_ZERO_COPY);
   });
+
+  updateMusicToggle();
+  showStatus(LEVEL_ZERO_COPY);
+  syncMusicState();
 }
 
 function onSelect() {
-  if (reticle.visible && currentLevel === 0) {
-    loadSuitcase(reticle.matrix.clone());
-    currentLevel = 1;
-    music.play().catch(() => {});
-    showStatus('Level 1: inspect the object and enter the code.');
+  if (currentLevel === 1) {
+    const selected = intersectInteractiveObject([noteObject]);
+    if (selected === noteObject) {
+      noteFound = true;
+      document.getElementById('pin-panel').style.display = 'block';
+      showStatus(`Записка найдена. Код: ${PIN_CODE}. Вернитесь к сундуку и откройте его.`);
+    }
     return;
   }
 
@@ -93,41 +133,113 @@ function onSelect() {
   }
 }
 
-function loadSuitcase(matrix) {
-  const fallbackCube = createFallbackCube(matrix);
+function intersectInteractiveObject(objects) {
+  const targets = objects.filter(Boolean);
+  if (targets.length === 0) {
+    return null;
+  }
+
+  const tempMatrix = new THREE.Matrix4();
+  tempMatrix.identity().extractRotation(controller.matrixWorld);
+  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+  const intersections = raycaster.intersectObjects(targets, true);
+  return intersections[0]?.object?.userData?.rootObject ?? intersections[0]?.object ?? null;
+}
+
+function placeLevelOne(matrix) {
+  levelPlaced = true;
+  currentLevel = 1;
+  showStatus(LEVEL_ONE_COPY);
+  loadChest(matrix);
+  noteObject = createCodeNote(matrix);
+  scene.add(noteObject);
+}
+
+function loadChest(matrix) {
+  const fallbackCube = createFallbackChest(matrix);
+  chestObject = fallbackCube;
   scene.add(fallbackCube);
-  showStatus(`Loading model: ${MODEL_URL}`);
 
   const loader = new GLTFLoader();
   loader.load(
-    MODEL_URL,
+    CHEST_MODEL_URL,
     (gltf) => {
       scene.remove(fallbackCube);
 
-      suitcase = gltf.scene;
-      suitcase.scale.setScalar(0.05);
-      applyPlacementFromMatrix(suitcase, matrix);
-      scene.add(suitcase);
-
-      document.getElementById('pin-panel').style.display = 'block';
-      showStatus('Model loaded. Enter the code.');
+      chestObject = gltf.scene;
+      chestObject.scale.setScalar(0.05);
+      applyPlacementFromMatrix(chestObject, matrix);
+      scene.add(chestObject);
     },
     undefined,
     (error) => {
-      console.error(`Model load failed for ${MODEL_URL}`, error);
-      showStatus(`Model failed to load. Showing fallback cube. URL: ${MODEL_URL}`);
+      console.error(`Chest load failed for ${CHEST_MODEL_URL}`, error);
+      showStatus(`${LEVEL_ONE_COPY} Модель сундука не загрузилась, поэтому показан тестовый куб.`);
     }
   );
 }
 
-function createFallbackCube(matrix) {
+function createFallbackChest(matrix) {
   const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(0.1, 0.1, 0.1),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    new THREE.BoxGeometry(0.16, 0.12, 0.12),
+    new THREE.MeshStandardMaterial({ color: 0xb22222, metalness: 0.2, roughness: 0.7 })
   );
 
   applyPlacementFromMatrix(cube, matrix);
+  cube.position.y += 0.06;
   return cube;
+}
+
+function createCodeNote(matrix) {
+  const note = new THREE.Group();
+  const board = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.18, 0.12),
+    new THREE.MeshBasicMaterial({ map: createNoteTexture(), transparent: true })
+  );
+  const back = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.19, 0.13),
+    new THREE.MeshBasicMaterial({ color: 0x0c120f, transparent: true, opacity: 0.85 })
+  );
+
+  note.add(back);
+  note.add(board);
+  note.userData.rootObject = note;
+  board.userData.rootObject = note;
+  back.userData.rootObject = note;
+
+  applyPlacementFromMatrix(note, matrix);
+  const offset = new THREE.Vector3(0.28, 0.1, -0.55);
+  offset.applyQuaternion(note.quaternion);
+  note.position.add(offset);
+  note.lookAt(camera.position.x, note.position.y, camera.position.z);
+
+  return note;
+}
+
+function createNoteTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 320;
+
+  const context = canvas.getContext('2d');
+  context.fillStyle = '#d7d1b0';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = '#101710';
+  context.font = 'bold 56px sans-serif';
+  context.textAlign = 'center';
+  context.fillText('PIN', canvas.width / 2, 100);
+  context.font = 'bold 96px monospace';
+  context.fillStyle = '#00ff88';
+  context.fillText(PIN_CODE, canvas.width / 2, 220);
+  context.font = '28px sans-serif';
+  context.fillStyle = '#101710';
+  context.fillText('Нажмите, чтобы прочитать', canvas.width / 2, 280);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
 }
 
 function applyPlacementFromMatrix(object, matrix) {
@@ -162,7 +274,30 @@ function startLevel2() {
 }
 
 function checkItemClick() {
-  showStatus('Level 2 interaction is not implemented yet.');
+  showStatus('Второй уровень пока не реализован до конца.');
+}
+
+function resumeMusic() {
+  if (!musicEnabled || document.hidden) {
+    return;
+  }
+
+  music.play().catch(() => {});
+}
+
+function syncMusicState() {
+  if (musicEnabled && !document.hidden) {
+    music.play().catch(() => {});
+    return;
+  }
+
+  music.pause();
+}
+
+function updateMusicToggle() {
+  const musicToggle = document.getElementById('music-toggle');
+  musicToggle.textContent = musicEnabled ? '♫' : '✕';
+  musicToggle.setAttribute('aria-label', musicEnabled ? 'Выключить музыку' : 'Включить музыку');
 }
 
 function animate() {
@@ -187,10 +322,21 @@ function render(_timestamp, frame) {
       const hitTestResults = frame.getHitTestResults(hitTestSource);
       if (hitTestResults.length > 0) {
         const hit = hitTestResults[0];
-        reticle.visible = true;
         reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
+
+        if (!levelPlaced) {
+          reticle.visible = true;
+          scanStableFrames += 1;
+          if (scanStableFrames > 20) {
+            placeLevelOne(reticle.matrix.clone());
+            reticle.visible = false;
+          }
+        } else {
+          reticle.visible = false;
+        }
       } else {
         reticle.visible = false;
+        scanStableFrames = 0;
       }
     }
   }
