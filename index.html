@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anomaly-vr</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #status-text {
+        position: fixed; /* Обязательно fixed для AR */
+        top: 20px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        color: #00ff00; /* Сделаем ярко-зеленым для теста */
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 99999; /* Выше всего остального */
+        padding: 15px 0;
+        font-weight: bold;
+        pointer-events: none; /* Чтобы клики проходили сквозь текст к AR */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status-text">Наведите камеру на пол для сканирования</div>
+    <div id="pin-panel"
+      style="display: none; position: fixed; bottom: 100px; width: 100%; text-align: center; z-index: 10000;">
+      <div
+        style="display: inline-block; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid #00ff00;">
+        <input type="text" id="pin-input" placeholder="КОД"
+          style="width: 80px; background: #222; color: #00ff00; border: 1px solid #00ff00; padding: 5px; text-align: center;">
+        <button id="pin-submit"
+          style="background: #00ff00; border: none; padding: 6px 15px; font-weight: bold; cursor: pointer;">ОК</button>
+      </div>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
