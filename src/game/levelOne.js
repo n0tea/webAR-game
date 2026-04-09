@@ -4,55 +4,141 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 export function createLevelOne({
   scene,
   controller,
-  chestModelUrl,
+  camera,
+  suitcaseModelUrl,
+  suitcaseOpenModelUrl,
+  suitcaseNoRadarModelUrl,
   paperModelUrl,
+  radarModelUrl,
   levelCopy,
   noteFoundCopy,
+  openSuitcaseCopy,
+  radarTakenCopy,
   onStatusChange,
   onPinDiscovered,
 }) {
   const raycaster = new THREE.Raycaster();
-  let chestObject = null;
+  let currentPhase = 'find_note';
+  let suitcaseAnchorMatrix = null;
+  let suitcaseObject = null;
   let noteObject = null;
+  let heldRadarObject = null;
 
   function place(matrix) {
+    suitcaseAnchorMatrix = matrix.clone();
     onStatusChange(levelCopy);
-    loadChest(matrix);
+    loadSuitcase(suitcaseModelUrl, matrix, { spawnPaperAfterLoad: true });
   }
 
   function handleSelect() {
-    const selected = intersectInteractiveObject([noteObject]);
-    if (selected !== noteObject) {
-      return false;
+    if (currentPhase === 'find_note') {
+      const selected = intersectInteractiveObject([noteObject]);
+      if (selected !== noteObject) {
+        return false;
+      }
+
+      onPinDiscovered();
+      onStatusChange(noteFoundCopy);
+      return true;
     }
 
-    onPinDiscovered();
-    onStatusChange(noteFoundCopy);
-    return true;
+    if (currentPhase === 'take_radar') {
+      const selected = intersectInteractiveObject([suitcaseObject]);
+      if (selected !== suitcaseObject) {
+        return false;
+      }
+
+      takeRadar();
+      return true;
+    }
+
+    return false;
   }
 
-  function loadChest(matrix) {
-    const fallbackCube = createFallbackChest(matrix);
-    chestObject = fallbackCube;
+  function handleCorrectPin() {
+    currentPhase = 'take_radar';
+    replaceSuitcase(suitcaseOpenModelUrl);
+    onStatusChange(openSuitcaseCopy);
+  }
+
+  function update() {
+    if (!heldRadarObject) {
+      return;
+    }
+
+    const offset = new THREE.Vector3(0.16, -0.12, -0.42);
+    offset.applyQuaternion(camera.quaternion);
+    heldRadarObject.position.copy(camera.position).add(offset);
+    heldRadarObject.quaternion.copy(camera.quaternion);
+  }
+
+  function loadSuitcase(modelUrl, matrix, options = {}) {
+    const fallbackCube = createFallbackSuitcase(matrix);
+    suitcaseObject = fallbackCube;
     scene.add(fallbackCube);
 
     const loader = new GLTFLoader();
     loader.load(
-      chestModelUrl,
+      modelUrl,
       (gltf) => {
         scene.remove(fallbackCube);
 
-        chestObject = gltf.scene;
-        chestObject.scale.setScalar(0.05);
-        applyPlacementFromMatrix(chestObject, matrix);
-        scene.add(chestObject);
-        loadPaper(matrix);
+        suitcaseObject = gltf.scene;
+        suitcaseObject.userData.rootObject = suitcaseObject;
+        suitcaseObject.traverse((child) => {
+          child.userData.rootObject = suitcaseObject;
+        });
+        suitcaseObject.scale.setScalar(0.05);
+        applyPlacementFromMatrix(suitcaseObject, matrix);
+        scene.add(suitcaseObject);
+
+        if (options.spawnPaperAfterLoad) {
+          loadPaper(matrix);
+        }
       },
       undefined,
       (error) => {
-        console.error(`Chest load failed for ${chestModelUrl}`, error);
-        onStatusChange(`${levelCopy} Модель сундука не загрузилась, поэтому показан тестовый куб.`);
-        loadPaper(matrix);
+        console.error(`Suitcase load failed for ${modelUrl}`, error);
+        onStatusChange(`${levelCopy} Модель чемодана не загрузилась, поэтому показан тестовый куб.`);
+
+        if (options.spawnPaperAfterLoad) {
+          loadPaper(matrix);
+        }
+      }
+    );
+  }
+
+  function replaceSuitcase(modelUrl) {
+    if (!suitcaseAnchorMatrix) {
+      return;
+    }
+
+    if (suitcaseObject) {
+      scene.remove(suitcaseObject);
+    }
+
+    const fallbackCube = createFallbackSuitcase(suitcaseAnchorMatrix);
+    suitcaseObject = fallbackCube;
+    scene.add(fallbackCube);
+
+    const loader = new GLTFLoader();
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        scene.remove(fallbackCube);
+
+        suitcaseObject = gltf.scene;
+        suitcaseObject.userData.rootObject = suitcaseObject;
+        suitcaseObject.traverse((child) => {
+          child.userData.rootObject = suitcaseObject;
+        });
+        suitcaseObject.scale.setScalar(0.05);
+        applyPlacementFromMatrix(suitcaseObject, suitcaseAnchorMatrix);
+        scene.add(suitcaseObject);
+      },
+      undefined,
+      (error) => {
+        console.error(`Suitcase replace failed for ${modelUrl}`, error);
       }
     );
   }
@@ -89,6 +175,41 @@ export function createLevelOne({
     );
   }
 
+  function takeRadar() {
+    currentPhase = 'radar_taken';
+    replaceSuitcase(suitcaseNoRadarModelUrl);
+    spawnHeldRadar();
+    onStatusChange(radarTakenCopy);
+  }
+
+  function spawnHeldRadar() {
+    if (heldRadarObject) {
+      scene.remove(heldRadarObject);
+      heldRadarObject = null;
+    }
+
+    const fallbackRadar = createFallbackRadar(camera);
+    heldRadarObject = fallbackRadar;
+    scene.add(fallbackRadar);
+
+    const loader = new GLTFLoader();
+    loader.load(
+      radarModelUrl,
+      (gltf) => {
+        scene.remove(fallbackRadar);
+
+        heldRadarObject = gltf.scene;
+        heldRadarObject.scale.setScalar(0.06);
+        scene.add(heldRadarObject);
+        update();
+      },
+      undefined,
+      (error) => {
+        console.error(`Radar load failed for ${radarModelUrl}`, error);
+      }
+    );
+  }
+
   function intersectInteractiveObject(objects) {
     const targets = objects.filter(Boolean);
     if (targets.length === 0) {
@@ -106,11 +227,13 @@ export function createLevelOne({
 
   return {
     place,
+    handleCorrectPin,
     handleSelect,
+    update,
   };
 }
 
-function createFallbackChest(matrix) {
+function createFallbackSuitcase(matrix) {
   const cube = new THREE.Mesh(
     new THREE.BoxGeometry(0.16, 0.12, 0.12),
     new THREE.MeshStandardMaterial({ color: 0xb22222, metalness: 0.2, roughness: 0.7 })
@@ -118,6 +241,7 @@ function createFallbackChest(matrix) {
 
   applyPlacementFromMatrix(cube, matrix);
   cube.position.y += 0.06;
+  cube.userData.rootObject = cube;
   return cube;
 }
 
@@ -133,6 +257,19 @@ function createFallbackPaper(matrix) {
   offset.applyQuaternion(note.quaternion);
   note.position.add(offset);
   return note;
+}
+
+function createFallbackRadar(camera) {
+  const radar = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 0.08, 0.02),
+    new THREE.MeshStandardMaterial({ color: 0x2f3a44, metalness: 0.3, roughness: 0.6 })
+  );
+
+  const offset = new THREE.Vector3(0.16, -0.12, -0.42);
+  offset.applyQuaternion(camera.quaternion);
+  radar.position.copy(camera.position).add(offset);
+  radar.quaternion.copy(camera.quaternion);
+  return radar;
 }
 
 function applyPlacementFromMatrix(object, matrix) {

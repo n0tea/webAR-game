@@ -3,7 +3,6 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 import './style.css';
 
 import {
-  CHEST_MODEL_URL,
   LEVEL_ONE_COPY,
   LEVEL_TWO_PENDING_COPY,
   LEVEL_ZERO_COPY,
@@ -11,7 +10,12 @@ import {
   NOTE_FOUND_COPY,
   PAPER_MODEL_URL,
   PIN_CODE,
+  RADAR_MODEL_URL,
+  RADAR_TAKEN_COPY,
   SCAN_COPY,
+  SUITCASE_MODEL_URL,
+  SUITCASE_NOR_MODEL_URL,
+  SUITCASE_OPEN_MODEL_URL,
   WRONG_PIN_COPY,
 } from './config.js';
 import { createLevelOne } from './game/levelOne.js';
@@ -74,10 +78,16 @@ function init() {
   levelOne = createLevelOne({
     scene,
     controller,
-    chestModelUrl: CHEST_MODEL_URL,
+    camera,
+    suitcaseModelUrl: SUITCASE_MODEL_URL,
+    suitcaseOpenModelUrl: SUITCASE_OPEN_MODEL_URL,
+    suitcaseNoRadarModelUrl: SUITCASE_NOR_MODEL_URL,
     paperModelUrl: PAPER_MODEL_URL,
+    radarModelUrl: RADAR_MODEL_URL,
     levelCopy: LEVEL_ONE_COPY,
     noteFoundCopy: NOTE_FOUND_COPY,
+    openSuitcaseCopy: LEVEL_TWO_PENDING_COPY,
+    radarTakenCopy: RADAR_TAKEN_COPY,
     onStatusChange: (text) => hud.setStatus(text),
     onPinDiscovered: () => {
       hud.showPinPanel();
@@ -124,6 +134,8 @@ function render(_timestamp, frame) {
     updateHitTest(frame);
   }
 
+  levelOne.update();
+
   if (currentLevel === 2) {
     items.forEach((item) => {
       const distance = camera.position.distanceTo(item.position);
@@ -142,7 +154,7 @@ function handlePinSubmit() {
   if (value === PIN_CODE) {
     hud.hidePinPanel();
     currentLevel = 2;
-    hud.setStatus(LEVEL_TWO_PENDING_COPY);
+    levelOne.handleCorrectPin();
     return;
   }
 
@@ -150,9 +162,11 @@ function handlePinSubmit() {
 }
 
 function onSelect() {
-  if (currentLevel === 1) {
-    levelOne.handleSelect();
-    return;
+  if (currentLevel === 1 || currentLevel === 2) {
+    const handled = levelOne.handleSelect();
+    if (handled) {
+      return;
+    }
   }
 
   if (currentLevel === 2) {
@@ -213,7 +227,7 @@ function createReticle() {
 }
 
 function checkItemClick() {
-  hud.setStatus('Второй уровень пока не реализован до конца.');
+  hud.setStatus(RADAR_TAKEN_COPY);
 }
 
 function resumeMusic() {
