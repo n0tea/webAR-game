@@ -1,6 +1,11 @@
 ﻿import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+const SUITCASE_SCALE = 0.15;
+const PAPER_SCALE = 0.04;
+const HELD_RADAR_SCALE = 0.06;
+const HELD_RADAR_OFFSET = new THREE.Vector3(0.08, -0.12, -0.42);
+
 export function createLevelOne({
   scene,
   controller,
@@ -66,8 +71,7 @@ export function createLevelOne({
       return;
     }
 
-    const offset = new THREE.Vector3(0.16, -0.12, -0.42);
-    offset.applyQuaternion(camera.quaternion);
+    const offset = HELD_RADAR_OFFSET.clone().applyQuaternion(camera.quaternion);
     heldRadarObject.position.copy(camera.position).add(offset);
     heldRadarObject.quaternion.copy(camera.quaternion);
   }
@@ -88,7 +92,7 @@ export function createLevelOne({
         suitcaseObject.traverse((child) => {
           child.userData.rootObject = suitcaseObject;
         });
-        suitcaseObject.scale.setScalar(0.05);
+        suitcaseObject.scale.setScalar(SUITCASE_SCALE);
         applyPlacementFromMatrix(suitcaseObject, matrix);
         scene.add(suitcaseObject);
 
@@ -132,7 +136,7 @@ export function createLevelOne({
         suitcaseObject.traverse((child) => {
           child.userData.rootObject = suitcaseObject;
         });
-        suitcaseObject.scale.setScalar(0.05);
+        suitcaseObject.scale.setScalar(SUITCASE_SCALE);
         applyPlacementFromMatrix(suitcaseObject, suitcaseAnchorMatrix);
         scene.add(suitcaseObject);
       },
@@ -159,7 +163,7 @@ export function createLevelOne({
         noteObject.traverse((child) => {
           child.userData.rootObject = noteObject;
         });
-        noteObject.scale.setScalar(0.12);
+        noteObject.scale.setScalar(PAPER_SCALE);
         applyPlacementFromMatrix(noteObject, matrix);
 
         const offset = new THREE.Vector3(0.28, 0.02, -0.55);
@@ -199,7 +203,7 @@ export function createLevelOne({
         scene.remove(fallbackRadar);
 
         heldRadarObject = gltf.scene;
-        heldRadarObject.scale.setScalar(0.06);
+        heldRadarObject.scale.setScalar(HELD_RADAR_SCALE);
         scene.add(heldRadarObject);
         update();
       },
@@ -240,6 +244,7 @@ function createFallbackSuitcase(matrix) {
   );
 
   applyPlacementFromMatrix(cube, matrix);
+  cube.scale.setScalar(3);
   cube.position.y += 0.06;
   cube.userData.rootObject = cube;
   return cube;
@@ -253,6 +258,7 @@ function createFallbackPaper(matrix) {
 
   note.userData.rootObject = note;
   applyPlacementFromMatrix(note, matrix);
+  note.scale.setScalar(0.33);
   const offset = new THREE.Vector3(0.28, 0.02, -0.55);
   offset.applyQuaternion(note.quaternion);
   note.position.add(offset);
@@ -265,8 +271,7 @@ function createFallbackRadar(camera) {
     new THREE.MeshStandardMaterial({ color: 0x2f3a44, metalness: 0.3, roughness: 0.6 })
   );
 
-  const offset = new THREE.Vector3(0.16, -0.12, -0.42);
-  offset.applyQuaternion(camera.quaternion);
+  const offset = HELD_RADAR_OFFSET.clone().applyQuaternion(camera.quaternion);
   radar.position.copy(camera.position).add(offset);
   radar.quaternion.copy(camera.quaternion);
   return radar;

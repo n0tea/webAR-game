@@ -5,7 +5,7 @@ export const SUITCASE_NOR_MODEL_URL = `${import.meta.env.BASE_URL}models/SUITCAS
 export const RADAR_MODEL_URL = `${import.meta.env.BASE_URL}models/ONLY_R.glb`;
 
 export const MUSIC_URL = `${import.meta.env.BASE_URL}Spaceouters-Fireflies.mp3`;
-export const PIN_CODE = '1234';
+export const PIN_CODE = '1376';
 
 export const LEVEL_ZERO_COPY = 'Для старта игры нажмите на кнопку Start AR.';
 export const SCAN_COPY = 'Наведите камеру на пол для сканирования.';
