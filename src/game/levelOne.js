@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export function createLevelOne({
@@ -18,7 +18,6 @@ export function createLevelOne({
   function place(matrix) {
     onStatusChange(levelCopy);
     loadChest(matrix);
-    loadPaper(matrix);
   }
 
   function handleSelect() {
@@ -47,11 +46,13 @@ export function createLevelOne({
         chestObject.scale.setScalar(0.05);
         applyPlacementFromMatrix(chestObject, matrix);
         scene.add(chestObject);
+        loadPaper(matrix);
       },
       undefined,
       (error) => {
         console.error(`Chest load failed for ${chestModelUrl}`, error);
         onStatusChange(`${levelCopy} Модель сундука не загрузилась, поэтому показан тестовый куб.`);
+        loadPaper(matrix);
       }
     );
   }
@@ -68,6 +69,7 @@ export function createLevelOne({
         scene.remove(fallbackNote);
 
         noteObject = gltf.scene;
+        noteObject.userData.rootObject = noteObject;
         noteObject.traverse((child) => {
           child.userData.rootObject = noteObject;
         });
