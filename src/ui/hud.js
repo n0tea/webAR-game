@@ -26,7 +26,6 @@ export function createHud() {
     },
     showPinPanel() {
       pinPanel.style.display = 'block';
-      pinInput.focus();
     },
     hidePinPanel() {
       pinPanel.style.display = 'none';
