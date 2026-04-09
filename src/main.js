@@ -86,7 +86,7 @@ function init() {
     radarModelUrl: RADAR_MODEL_URL,
     levelCopy: LEVEL_ONE_COPY,
     noteFoundCopy: NOTE_FOUND_COPY,
-    openSuitcaseCopy: LEVEL_TWO_PENDING_COPY,
+    openSuitcaseCopy: SUITCASE_OPEN_COPY,
     radarTakenCopy: RADAR_TAKEN_COPY,
     onStatusChange: (text) => hud.setStatus(text),
     onPinDiscovered: () => {
