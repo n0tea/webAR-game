@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 const PORTAL_SCALE = 0.42;
 const PORTAL_OFFSET = new THREE.Vector3(0, 0.01, -1.72);
-const PORTAL_TRIGGER_DISTANCE = 0.8;
+const PORTAL_TRIGGER_DISTANCE = 0.3;
 
 export function createLevelThree({
   scene,
