@@ -70,20 +70,22 @@ export function createHud() {
       item.append(image, caption);
       inventoryItems.appendChild(item);
     },
-    async mergeInventoryItems() {
+    async mergeInventoryItems({ finalImageUrl } = {}) {
       const items = Array.from(inventoryItems.querySelectorAll('.inventory-item'));
       if (items.length < 2) {
         return;
       }
 
+      const leftImageUrl = items[0].querySelector('img')?.src ?? '';
+      const rightImageUrl = items[1].querySelector('img')?.src ?? '';
       const mergeCard = document.createElement('div');
       mergeCard.className = 'inventory-merge-card';
       mergeCard.innerHTML = `
         <div class="inventory-merge-halves">
-          <img class="inventory-merge-half inventory-merge-half--left" src="${items[0].querySelector('img')?.src ?? ''}" alt="" />
-          <img class="inventory-merge-half inventory-merge-half--right" src="${items[1].querySelector('img')?.src ?? ''}" alt="" />
+          <img class="inventory-merge-half inventory-merge-half--left" src="${leftImageUrl}" alt="" />
+          <img class="inventory-merge-half inventory-merge-half--right" src="${rightImageUrl}" alt="" />
         </div>
-        <div class="inventory-merge-ring">◌</div>
+        <img class="inventory-merge-final" src="${finalImageUrl ?? ''}" alt="Кольцо собрано" />
         <div class="inventory-item-label">Кольцо собрано</div>
       `;
 

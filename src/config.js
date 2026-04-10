@@ -9,6 +9,7 @@ export const ANCIENT_PORTAL_MODEL_URL = `${import.meta.env.BASE_URL}models/ANCIE
 export const RADAR_SOUND_URL = `${import.meta.env.BASE_URL}sounds/RadarSOUND.mp3`;
 export const RING_HALF_1_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingHalf1.png`;
 export const RING_HALF_2_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingHalf2.png`;
+export const RING_FULL_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingFull.png`;
 
 export const MUSIC_URL = `${import.meta.env.BASE_URL}Spaceouters-Fireflies.mp3`;
 export const PIN_CODE = '1376';

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const PORTAL_SCALE = 0.24;
-const PORTAL_OFFSET = new THREE.Vector3(0, 0.01, -1.5);
-const PORTAL_TRIGGER_DISTANCE = 0.85;
+const PORTAL_SCALE = 0.42;
+const PORTAL_OFFSET = new THREE.Vector3(0, 0.01, -1.2);
+const PORTAL_TRIGGER_DISTANCE = 1.15;
 
 export function createLevelThree({
   scene,
@@ -40,7 +40,7 @@ export function createLevelThree({
       return;
     }
 
-    if (camera.position.distanceTo(portalObject.position) <= PORTAL_TRIGGER_DISTANCE) {
+    if (getHorizontalDistance(camera.position, portalObject.position) <= PORTAL_TRIGGER_DISTANCE) {
       completed = true;
       onStatusChange(completeCopy);
     }
@@ -84,7 +84,7 @@ export function createLevelThree({
 
 function createFallbackPortal(matrix) {
   const portal = new THREE.Mesh(
-    new THREE.RingGeometry(0.42, 0.68, 48),
+    new THREE.RingGeometry(0.58, 0.95, 56),
     new THREE.MeshBasicMaterial({ color: 0x4cd7ff, side: THREE.DoubleSide })
   );
 
@@ -103,4 +103,10 @@ function applyPlacementFromMatrix(object, matrix) {
   matrix.decompose(position, quaternion, scale);
   object.position.copy(position);
   object.quaternion.copy(quaternion);
+}
+
+function getHorizontalDistance(a, b) {
+  const dx = a.x - b.x;
+  const dz = a.z - b.z;
+  return Math.sqrt(dx * dx + dz * dz);
 }

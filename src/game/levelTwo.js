@@ -95,7 +95,6 @@ export function createLevelTwo({
     }
 
     onCollectPart({ imageUrl: ringHalf2ImageUrl, label: 'Часть кольца II' });
-    onStatusChange(completeCopy);
     active = false;
     onComplete?.();
   }

@@ -19,6 +19,7 @@ import {
   RADAR_MODEL_URL,
   RADAR_SOUND_URL,
   RADAR_TAKEN_COPY,
+  RING_FULL_IMAGE_URL,
   RING_HALF_1_IMAGE_URL,
   RING_HALF_2_IMAGE_URL,
   RING_PART_MODEL_URL,
@@ -140,7 +141,7 @@ function init() {
       hud.addInventoryItem({ imageUrl, label });
     },
     onComplete: async () => {
-      await hud.mergeInventoryItems();
+      await hud.mergeInventoryItems({ finalImageUrl: RING_FULL_IMAGE_URL });
       hud.setStatus(LEVEL_THREE_MERGE_COPY);
       setTimeout(() => {
         currentLevel = 4;
