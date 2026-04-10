@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const PART_SCALE = 0.045;
+const PART_SCALE = 0.11;
 const PART_SPAWN_OFFSETS = [
-  new THREE.Vector3(1.6, 0.05, -1.8),
-  new THREE.Vector3(-1.4, 0.05, -2.1),
+  new THREE.Vector3(0.85, 0.05, -1.05),
+  new THREE.Vector3(-0.9, 0.05, -1.2),
 ];
 
 export function createLevelTwo({
@@ -163,6 +163,7 @@ function createFallbackPart(matrix, partIndex) {
   mesh.userData.rootObject = mesh;
   applyPlacementFromMatrix(mesh, matrix);
   mesh.position.add(PART_SPAWN_OFFSETS[partIndex].clone());
+  mesh.scale.setScalar(1.35);
   mesh.rotation.x = Math.PI / 2;
   return mesh;
 }

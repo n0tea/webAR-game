@@ -111,11 +111,10 @@ function init() {
       hud.resetInventory();
       levelTwoStartTimeout = setTimeout(() => {
         currentLevel = 3;
-        levelOne.cleanupScene();
         hud.showInventory();
         levelTwo.start(anchorMatrix);
         levelTwoStartTimeout = null;
-      }, 1600);
+      }, 2200);
     },
   });
 
