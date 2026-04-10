@@ -73,6 +73,59 @@ body {
   z-index: 10000;
 }
 
+#inventory-panel {
+  position: fixed;
+  top: 112px;
+  left: 20px;
+  width: min(34vw, 220px);
+  min-width: 150px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--neon);
+  background: var(--bg-panel);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.22);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#inventory-panel.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.inventory-title {
+  color: var(--neon);
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.inventory-items {
+  display: grid;
+  gap: 10px;
+}
+
+.inventory-item {
+  display: grid;
+  gap: 6px;
+}
+
+.inventory-item-image {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.inventory-item-label {
+  color: var(--neon);
+  font-size: 13px;
+  text-align: center;
+}
+
 #pin-shell {
   display: inline-flex;
   align-items: center;
@@ -119,6 +172,11 @@ body {
 @media (max-width: 768px) {
   #status-text {
     font-size: 14px;
+  }
+
+  #inventory-panel {
+    top: 96px;
+    width: min(42vw, 180px);
   }
 
   #pin-shell {

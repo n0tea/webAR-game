@@ -4,6 +4,8 @@ export function createHud() {
   const pinInput = document.getElementById('pin-input');
   const pinSubmit = document.getElementById('pin-submit');
   const musicToggle = document.getElementById('music-toggle');
+  const inventoryPanel = createInventoryPanel();
+  const inventoryItems = inventoryPanel.querySelector('.inventory-items');
   let lastPinSubmitAt = 0;
 
   function runOncePerTap(handler) {
@@ -43,6 +45,31 @@ export function createHud() {
     bindMusicToggle(handler) {
       musicToggle.addEventListener('click', handler);
     },
+    resetInventory() {
+      inventoryItems.innerHTML = '';
+    },
+    showInventory() {
+      inventoryPanel.classList.add('is-visible');
+    },
+    hideInventory() {
+      inventoryPanel.classList.remove('is-visible');
+    },
+    addInventoryItem({ imageUrl, label }) {
+      const item = document.createElement('div');
+      item.className = 'inventory-item';
+
+      const image = document.createElement('img');
+      image.className = 'inventory-item-image';
+      image.src = imageUrl;
+      image.alt = label;
+
+      const caption = document.createElement('div');
+      caption.className = 'inventory-item-label';
+      caption.textContent = label;
+
+      item.append(image, caption);
+      inventoryItems.appendChild(item);
+    },
     setMusicToggleVisible(isVisible) {
       musicToggle.classList.toggle('is-visible', isVisible);
     },
@@ -54,4 +81,15 @@ export function createHud() {
       );
     },
   };
+}
+
+function createInventoryPanel() {
+  const panel = document.createElement('aside');
+  panel.id = 'inventory-panel';
+  panel.innerHTML = `
+    <div class="inventory-title">Инвентарь</div>
+    <div class="inventory-items"></div>
+  `;
+  document.body.appendChild(panel);
+  return panel;
 }

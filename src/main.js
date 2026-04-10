@@ -3,6 +3,9 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 import './style.css';
 
 import {
+  LEVEL_TWO_COMPLETE_COPY,
+  LEVEL_TWO_COPY,
+  LEVEL_TWO_FIRST_FOUND_COPY,
   LEVEL_ONE_COPY,
   LEVEL_ZERO_COPY,
   MUSIC_URL,
@@ -10,7 +13,11 @@ import {
   PAPER_MODEL_URL,
   PIN_CODE,
   RADAR_MODEL_URL,
+  RADAR_SOUND_URL,
   RADAR_TAKEN_COPY,
+  RING_HALF_1_IMAGE_URL,
+  RING_HALF_2_IMAGE_URL,
+  RING_PART_MODEL_URL,
   SCAN_COPY,
   SUITCASE_OPEN_COPY,
   SUITCASE_MODEL_URL,
@@ -19,6 +26,7 @@ import {
   WRONG_PIN_COPY,
 } from './config.js';
 import { createLevelOne } from './game/levelOne.js';
+import { createLevelTwo } from './game/levelTwo.js';
 import { createHud } from './ui/hud.js';
 
 let camera;
@@ -29,6 +37,7 @@ let hitTestSourceRequested = false;
 let hud;
 let items = [];
 let levelOne;
+let levelTwo;
 let levelPlaced = false;
 let musicEnabled = true;
 let renderer;
@@ -92,6 +101,30 @@ function init() {
     onPinDiscovered: () => {
       hud.showPinPanel();
     },
+    onRadarTaken: ({ anchorMatrix }) => {
+      currentLevel = 3;
+      levelOne.cleanupScene();
+      hud.resetInventory();
+      hud.showInventory();
+      levelTwo.start(anchorMatrix);
+    },
+  });
+
+  levelTwo = createLevelTwo({
+    scene,
+    controller,
+    camera,
+    ringPartModelUrl: RING_PART_MODEL_URL,
+    radarSoundUrl: RADAR_SOUND_URL,
+    ringHalf1ImageUrl: RING_HALF_1_IMAGE_URL,
+    ringHalf2ImageUrl: RING_HALF_2_IMAGE_URL,
+    levelCopy: LEVEL_TWO_COPY,
+    firstFoundCopy: LEVEL_TWO_FIRST_FOUND_COPY,
+    completeCopy: LEVEL_TWO_COMPLETE_COPY,
+    onStatusChange: (text) => hud.setStatus(text),
+    onCollectPart: ({ imageUrl, label }) => {
+      hud.addInventoryItem({ imageUrl, label });
+    },
   });
 
   window.addEventListener('resize', onWindowResize);
@@ -107,14 +140,19 @@ function init() {
 
   renderer.xr.addEventListener('sessionstart', () => {
     hud.setMusicToggleVisible(true);
+    hud.hideInventory();
+    hud.resetInventory();
     hud.setStatus(SCAN_COPY);
     resumeMusic();
   });
 
   renderer.xr.addEventListener('sessionend', () => {
     hud.setMusicToggleVisible(false);
+    hud.hideInventory();
+    hud.resetInventory();
     hitTestSourceRequested = false;
     hitTestSource = null;
+    levelTwo.stop();
     reticle.visible = false;
     scanStableFrames = 0;
     hud.setStatus(LEVEL_ZERO_COPY);
@@ -135,8 +173,9 @@ function render(_timestamp, frame) {
   }
 
   levelOne.update();
+  levelTwo.update();
 
-  if (currentLevel === 2) {
+  if (currentLevel === 3) {
     items.forEach((item) => {
       const distance = camera.position.distanceTo(item.position);
       if (distance < 0.7) {
@@ -164,6 +203,13 @@ function handlePinSubmit() {
 function onSelect() {
   if (currentLevel === 1 || currentLevel === 2) {
     const handled = levelOne.handleSelect();
+    if (handled) {
+      return;
+    }
+  }
+
+  if (currentLevel === 3) {
+    const handled = levelTwo.handleSelect();
     if (handled) {
       return;
     }

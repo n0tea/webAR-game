@@ -3,6 +3,10 @@ export const SUITCASE_MODEL_URL = `${import.meta.env.BASE_URL}models/SUITCASE.gl
 export const SUITCASE_OPEN_MODEL_URL = `${import.meta.env.BASE_URL}models/SUITCASEwR.glb`;
 export const SUITCASE_NOR_MODEL_URL = `${import.meta.env.BASE_URL}models/SUITCASEnoR.glb`;
 export const RADAR_MODEL_URL = `${import.meta.env.BASE_URL}models/ONLY_R.glb`;
+export const RING_PART_MODEL_URL = `${import.meta.env.BASE_URL}models/RingPART.glb`;
+export const RADAR_SOUND_URL = `${import.meta.env.BASE_URL}sounds/RadarSOUND.mp3`;
+export const RING_HALF_1_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingHalf1.png`;
+export const RING_HALF_2_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingHalf2.png`;
 
 export const MUSIC_URL = `${import.meta.env.BASE_URL}Spaceouters-Fireflies.mp3`;
 export const PIN_CODE = '1376';
@@ -21,3 +25,9 @@ export const SUITCASE_OPEN_COPY =
   `Заберите содержимое чемодана.`;
 export const RADAR_TAKEN_COPY =
   'Радар у вас. Готовьтесь к следующему уровню.';
+export const LEVEL_TWO_COPY =
+  'Используя радар и ориентируясь на частоту звуков, найдите 2 части легендарного артефакта.';
+export const LEVEL_TWO_FIRST_FOUND_COPY =
+  'Первая часть артефакта найдена. Продолжайте поиск второй части.';
+export const LEVEL_TWO_COMPLETE_COPY =
+  'Обе части артефакта найдены. Инвентарь обновлён, можно переходить к третьему уровню.';

@@ -21,6 +21,7 @@ export function createLevelOne({
   radarTakenCopy,
   onStatusChange,
   onPinDiscovered,
+  onRadarTaken,
 }) {
   const raycaster = new THREE.Raycaster();
   let currentPhase = 'find_note';
@@ -184,6 +185,7 @@ export function createLevelOne({
     replaceSuitcase(suitcaseNoRadarModelUrl);
     spawnHeldRadar();
     onStatusChange(radarTakenCopy);
+    onRadarTaken?.({ anchorMatrix: suitcaseAnchorMatrix.clone() });
   }
 
   function spawnHeldRadar() {
@@ -230,6 +232,14 @@ export function createLevelOne({
   }
 
   return {
+    cleanupScene() {
+      if (suitcaseObject) {
+        scene.remove(suitcaseObject);
+      }
+      if (noteObject) {
+        scene.remove(noteObject);
+      }
+    },
     place,
     handleCorrectPin,
     handleSelect,
