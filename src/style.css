@@ -75,7 +75,7 @@ body {
 
 #inventory-panel {
   position: fixed;
-  top: 112px;
+  top: 164px;
   left: 20px;
   width: min(34vw, 220px);
   min-width: 150px;
@@ -175,7 +175,7 @@ body {
   }
 
   #inventory-panel {
-    top: 96px;
+    top: 148px;
     width: min(42vw, 180px);
   }
 

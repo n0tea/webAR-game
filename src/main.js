@@ -44,6 +44,7 @@ let renderer;
 let reticle;
 let scanStableFrames = 0;
 let scene;
+let levelTwoStartTimeout = null;
 
 const music = new Audio(MUSIC_URL);
 music.loop = true;
@@ -102,11 +103,19 @@ function init() {
       hud.showPinPanel();
     },
     onRadarTaken: ({ anchorMatrix }) => {
-      currentLevel = 3;
-      levelOne.cleanupScene();
+      if (levelTwoStartTimeout) {
+        clearTimeout(levelTwoStartTimeout);
+      }
+
+      hud.hideInventory();
       hud.resetInventory();
-      hud.showInventory();
-      levelTwo.start(anchorMatrix);
+      levelTwoStartTimeout = setTimeout(() => {
+        currentLevel = 3;
+        levelOne.cleanupScene();
+        hud.showInventory();
+        levelTwo.start(anchorMatrix);
+        levelTwoStartTimeout = null;
+      }, 1600);
     },
   });
 
@@ -147,6 +156,10 @@ function init() {
   });
 
   renderer.xr.addEventListener('sessionend', () => {
+    if (levelTwoStartTimeout) {
+      clearTimeout(levelTwoStartTimeout);
+      levelTwoStartTimeout = null;
+    }
     hud.setMusicToggleVisible(false);
     hud.hideInventory();
     hud.resetInventory();
