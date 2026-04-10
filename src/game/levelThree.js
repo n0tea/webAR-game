@@ -17,6 +17,7 @@ export function createLevelThree({
   let completed = false;
   let portalObject = null;
   let anchorMatrix = null;
+  let triggerCenter = new THREE.Vector3();
 
   function start(matrix) {
     active = true;
@@ -33,6 +34,7 @@ export function createLevelThree({
       scene.remove(portalObject);
       portalObject = null;
     }
+    triggerCenter.setScalar(0);
   }
 
   function update() {
@@ -40,7 +42,7 @@ export function createLevelThree({
       return;
     }
 
-    if (getHorizontalDistance(camera.position, portalObject.position) <= PORTAL_TRIGGER_DISTANCE) {
+    if (getHorizontalDistance(camera.position, triggerCenter) <= PORTAL_TRIGGER_DISTANCE) {
       completed = true;
       onStatusChange(completeCopy);
     }
@@ -53,6 +55,7 @@ export function createLevelThree({
 
     const fallbackPortal = createFallbackPortal(anchorMatrix);
     portalObject = fallbackPortal;
+    triggerCenter.copy(updateTriggerCenter(fallbackPortal));
     scene.add(fallbackPortal);
 
     const loader = new GLTFLoader();
@@ -67,6 +70,7 @@ export function createLevelThree({
         const offset = PORTAL_OFFSET.clone().applyQuaternion(portalObject.quaternion);
         portalObject.position.add(offset);
         scene.add(portalObject);
+        triggerCenter.copy(updateTriggerCenter(portalObject));
       },
       undefined,
       (error) => {
@@ -103,6 +107,16 @@ function applyPlacementFromMatrix(object, matrix) {
   matrix.decompose(position, quaternion, scale);
   object.position.copy(position);
   object.quaternion.copy(quaternion);
+}
+
+function updateTriggerCenter(object) {
+  object.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(object);
+  if (box.isEmpty()) {
+    return object.position.clone();
+  }
+
+  return box.getCenter(new THREE.Vector3());
 }
 
 function getHorizontalDistance(a, b) {
