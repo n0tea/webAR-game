@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const PART_SCALE = 0.11;
+const PART_SCALE = 0.16;
 const PART_SPAWN_OFFSETS = [
-  new THREE.Vector3(0.85, 0.05, -1.05),
-  new THREE.Vector3(-0.9, 0.05, -1.2),
+  new THREE.Vector3(0.55, 0.05, -0.78),
+  new THREE.Vector3(-0.62, 0.05, -0.88),
 ];
 
 export function createLevelTwo({
@@ -20,6 +20,7 @@ export function createLevelTwo({
   completeCopy,
   onStatusChange,
   onCollectPart,
+  onComplete,
 }) {
   const raycaster = new THREE.Raycaster();
   const radarSound = new Audio(radarSoundUrl);
@@ -96,6 +97,7 @@ export function createLevelTwo({
     onCollectPart({ imageUrl: ringHalf2ImageUrl, label: 'Часть кольца II' });
     onStatusChange(completeCopy);
     active = false;
+    onComplete?.();
   }
 
   function spawnPart(partIndex) {
@@ -147,6 +149,9 @@ export function createLevelTwo({
   }
 
   return {
+    getAnchorMatrix() {
+      return anchorMatrix?.clone() ?? null;
+    },
     handleSelect,
     start,
     stop,

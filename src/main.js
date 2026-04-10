@@ -3,9 +3,13 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 import './style.css';
 
 import {
+  ANCIENT_PORTAL_MODEL_URL,
   LEVEL_TWO_COMPLETE_COPY,
   LEVEL_TWO_COPY,
   LEVEL_TWO_FIRST_FOUND_COPY,
+  LEVEL_THREE_COPY,
+  LEVEL_THREE_END_COPY,
+  LEVEL_THREE_MERGE_COPY,
   LEVEL_ONE_COPY,
   LEVEL_ZERO_COPY,
   MUSIC_URL,
@@ -27,6 +31,7 @@ import {
 } from './config.js';
 import { createLevelOne } from './game/levelOne.js';
 import { createLevelTwo } from './game/levelTwo.js';
+import { createLevelThree } from './game/levelThree.js';
 import { createHud } from './ui/hud.js';
 
 let camera;
@@ -38,6 +43,7 @@ let hud;
 let items = [];
 let levelOne;
 let levelTwo;
+let levelThree;
 let levelPlaced = false;
 let musicEnabled = true;
 let renderer;
@@ -133,6 +139,23 @@ function init() {
     onCollectPart: ({ imageUrl, label }) => {
       hud.addInventoryItem({ imageUrl, label });
     },
+    onComplete: async () => {
+      await hud.mergeInventoryItems();
+      hud.setStatus(LEVEL_THREE_MERGE_COPY);
+      setTimeout(() => {
+        currentLevel = 4;
+        levelThree.start(levelTwo.getAnchorMatrix());
+      }, 1400);
+    },
+  });
+
+  levelThree = createLevelThree({
+    scene,
+    camera,
+    portalModelUrl: ANCIENT_PORTAL_MODEL_URL,
+    levelCopy: LEVEL_THREE_COPY,
+    completeCopy: LEVEL_THREE_END_COPY,
+    onStatusChange: (text) => hud.setStatus(text),
   });
 
   window.addEventListener('resize', onWindowResize);
@@ -165,6 +188,7 @@ function init() {
     hitTestSourceRequested = false;
     hitTestSource = null;
     levelTwo.stop();
+    levelThree.stop();
     reticle.visible = false;
     scanStableFrames = 0;
     hud.setStatus(LEVEL_ZERO_COPY);
@@ -186,8 +210,9 @@ function render(_timestamp, frame) {
 
   levelOne.update();
   levelTwo.update();
+  levelThree.update();
 
-  if (currentLevel === 3) {
+  if (currentLevel === 3 || currentLevel === 4) {
     items.forEach((item) => {
       const distance = camera.position.distanceTo(item.position);
       if (distance < 0.7) {

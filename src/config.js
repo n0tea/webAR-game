@@ -4,6 +4,8 @@ export const SUITCASE_OPEN_MODEL_URL = `${import.meta.env.BASE_URL}models/SUITCA
 export const SUITCASE_NOR_MODEL_URL = `${import.meta.env.BASE_URL}models/SUITCASEnoR.glb`;
 export const RADAR_MODEL_URL = `${import.meta.env.BASE_URL}models/ONLY_R.glb`;
 export const RING_PART_MODEL_URL = `${import.meta.env.BASE_URL}models/RingPART.glb`;
+export const ANCIENT_RING_MODEL_URL = `${import.meta.env.BASE_URL}models/ancient_medieval_ring.glb`;
+export const ANCIENT_PORTAL_MODEL_URL = `${import.meta.env.BASE_URL}models/ANCIENT_PORTAL.glb`;
 export const RADAR_SOUND_URL = `${import.meta.env.BASE_URL}sounds/RadarSOUND.mp3`;
 export const RING_HALF_1_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingHalf1.png`;
 export const RING_HALF_2_IMAGE_URL = `${import.meta.env.BASE_URL}pics/RingHalf2.png`;
@@ -31,3 +33,8 @@ export const LEVEL_TWO_FIRST_FOUND_COPY =
   'Первая часть артефакта найдена. Продолжайте поиск второй части.';
 export const LEVEL_TWO_COMPLETE_COPY =
   'Обе части артефакта найдены. Инвентарь обновлён, можно переходить к третьему уровню.';
+export const LEVEL_THREE_MERGE_COPY =
+  'Кольцо собрано, приступаем к третьей части вашего задания.';
+export const LEVEL_THREE_COPY =
+  'Только надев это кольцо ты сможешь увидеть то, что недоступно другим. Заходи в портал, кольцо поможет тебе пройти через него в параллельный мир.';
+export const LEVEL_THREE_END_COPY = 'Продолжение следует...';

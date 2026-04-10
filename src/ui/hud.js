@@ -70,6 +70,34 @@ export function createHud() {
       item.append(image, caption);
       inventoryItems.appendChild(item);
     },
+    async mergeInventoryItems() {
+      const items = Array.from(inventoryItems.querySelectorAll('.inventory-item'));
+      if (items.length < 2) {
+        return;
+      }
+
+      const mergeCard = document.createElement('div');
+      mergeCard.className = 'inventory-merge-card';
+      mergeCard.innerHTML = `
+        <div class="inventory-merge-halves">
+          <img class="inventory-merge-half inventory-merge-half--left" src="${items[0].querySelector('img')?.src ?? ''}" alt="" />
+          <img class="inventory-merge-half inventory-merge-half--right" src="${items[1].querySelector('img')?.src ?? ''}" alt="" />
+        </div>
+        <div class="inventory-merge-ring">◌</div>
+        <div class="inventory-item-label">Кольцо собрано</div>
+      `;
+
+      inventoryItems.innerHTML = '';
+      inventoryItems.appendChild(mergeCard);
+
+      requestAnimationFrame(() => {
+        mergeCard.classList.add('is-merging');
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1400);
+      });
+    },
     setMusicToggleVisible(isVisible) {
       musicToggle.classList.toggle('is-visible', isVisible);
     },

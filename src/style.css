@@ -126,6 +126,62 @@ body {
   text-align: center;
 }
 
+.inventory-merge-card {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 8px 6px 4px;
+}
+
+.inventory-merge-halves {
+  position: relative;
+  width: 100%;
+  min-height: 88px;
+}
+
+.inventory-merge-half {
+  position: absolute;
+  top: 0;
+  width: 42%;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  transition: transform 0.9s ease, opacity 0.9s ease;
+}
+
+.inventory-merge-half--left {
+  left: 0;
+}
+
+.inventory-merge-half--right {
+  right: 0;
+}
+
+.inventory-merge-ring {
+  font-size: 52px;
+  line-height: 1;
+  color: var(--neon);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.5s ease 0.6s, transform 0.5s ease 0.6s;
+  text-shadow: 0 0 14px rgba(0, 255, 136, 0.45);
+}
+
+.inventory-merge-card.is-merging .inventory-merge-half--left {
+  transform: translateX(58%);
+  opacity: 0.2;
+}
+
+.inventory-merge-card.is-merging .inventory-merge-half--right {
+  transform: translateX(-58%);
+  opacity: 0.2;
+}
+
+.inventory-merge-card.is-merging .inventory-merge-ring {
+  opacity: 1;
+  transform: scale(1);
+}
+
 #pin-shell {
   display: inline-flex;
   align-items: center;
