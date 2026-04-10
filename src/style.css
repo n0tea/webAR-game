@@ -115,6 +115,10 @@ body {
 
 .inventory-item-image {
   width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  padding: 10px;
+  box-sizing: border-box;
   border-radius: 10px;
   border: 1px solid rgba(0, 255, 136, 0.4);
   background: rgba(255, 255, 255, 0.08);
@@ -143,10 +147,13 @@ body {
   position: absolute;
   top: 0;
   width: 28%;
+  padding: 4px;
+  box-sizing: border-box;
+  object-fit: contain;
   border-radius: 10px;
   border: 1px solid rgba(0, 255, 136, 0.35);
   background: rgba(255, 255, 255, 0.08);
-  transition: transform 0.9s ease, opacity 0.9s ease;
+  transition: transform 0.45s ease, opacity 0.45s ease;
 }
 
 .inventory-merge-half--left {
@@ -160,22 +167,25 @@ body {
 .inventory-merge-final {
   width: 52%;
   max-width: 92px;
+  padding: 8px;
+  box-sizing: border-box;
+  object-fit: contain;
   border-radius: 10px;
   border: 1px solid rgba(0, 255, 136, 0.35);
   background: rgba(255, 255, 255, 0.08);
   opacity: 0;
   transform: scale(0.65);
-  transition: opacity 0.5s ease 0.6s, transform 0.5s ease 0.6s;
+  transition: opacity 0.35s ease 0.5s, transform 0.35s ease 0.5s;
 }
 
 .inventory-merge-card.is-merging .inventory-merge-half--left {
   transform: translateX(82%);
-  opacity: 0.2;
+  opacity: 0;
 }
 
 .inventory-merge-card.is-merging .inventory-merge-half--right {
   transform: translateX(-82%);
-  opacity: 0.2;
+  opacity: 0;
 }
 
 .inventory-merge-card.is-merging .inventory-merge-final {
