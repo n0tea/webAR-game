@@ -5,7 +5,7 @@ const SUITCASE_SCALE = 0.15;
 const PAPER_SCALE = 0.04;
 const HELD_RADAR_SCALE = 0.06;
 const HELD_RADAR_OFFSET = new THREE.Vector3(0.08, -0.12, -0.42);
-const HELD_RADAR_TILT_X = 0.18;
+const HELD_RADAR_TILT_X = 0.20;
 
 export function createLevelOne({
   scene,
