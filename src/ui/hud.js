@@ -99,6 +99,24 @@ export function createHud() {
       await new Promise((resolve) => {
         setTimeout(resolve, 1400);
       });
+
+      inventoryItems.innerHTML = '';
+      if (finalImageUrl) {
+        const finalItem = document.createElement('div');
+        finalItem.className = 'inventory-item';
+
+        const image = document.createElement('img');
+        image.className = 'inventory-item-image';
+        image.src = finalImageUrl;
+        image.alt = 'Кольцо собрано';
+
+        const caption = document.createElement('div');
+        caption.className = 'inventory-item-label';
+        caption.textContent = 'Кольцо собрано';
+
+        finalItem.append(image, caption);
+        inventoryItems.appendChild(finalItem);
+      }
     },
     setMusicToggleVisible(isVisible) {
       musicToggle.classList.toggle('is-visible', isVisible);

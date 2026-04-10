@@ -5,6 +5,7 @@ const SUITCASE_SCALE = 0.15;
 const PAPER_SCALE = 0.04;
 const HELD_RADAR_SCALE = 0.06;
 const HELD_RADAR_OFFSET = new THREE.Vector3(0.08, -0.12, -0.42);
+const HELD_RADAR_TILT_X = 0.18;
 
 export function createLevelOne({
   scene,
@@ -75,6 +76,7 @@ export function createLevelOne({
     const offset = HELD_RADAR_OFFSET.clone().applyQuaternion(camera.quaternion);
     heldRadarObject.position.copy(camera.position).add(offset);
     heldRadarObject.quaternion.copy(camera.quaternion);
+    heldRadarObject.rotateX(HELD_RADAR_TILT_X);
   }
 
   function loadSuitcase(modelUrl, matrix, options = {}) {
@@ -284,6 +286,7 @@ function createFallbackRadar(camera) {
   const offset = HELD_RADAR_OFFSET.clone().applyQuaternion(camera.quaternion);
   radar.position.copy(camera.position).add(offset);
   radar.quaternion.copy(camera.quaternion);
+  radar.rotateX(HELD_RADAR_TILT_X);
   return radar;
 }
 
